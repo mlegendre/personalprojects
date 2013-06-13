@@ -16,22 +16,23 @@ read choice
 
 
 function change_dir() {
- dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "account_reports" "demo_site" )
+cd vendor/plugins
+
+dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "account_reports" "demo_site" )
  if [ -e $dirs ]
  then
-   cd vendor/plugins
-
    for i in "${dirs[@]}"
     do
-    cd $i
-    git pull origin master
-    git rebase origin/master
-    cd ../
+      cd $i
+      git pull origin master
+      git rebase origin/master
+      cd ../
    done
  cd ../../
 else 
-  echo "You need to install some plugins man"
-
+echo "################################################################"
+echo "You seem to be missing plugins, I will now install those for you"
+echo "################################################################"
   for i in "${dirs[@]}"
     do
      git clone ssh://marc@gerrit.instructure.com:29418/$i.git
@@ -40,26 +41,6 @@ else
     cd ../../
 fi
 }
-
-
-#function change_dir() {
-# dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "account_reports" "demo_site" )
-#if -e [ $dirs ]   
-#then
-#   cd vendor/plugins   
-#   
-#   for i in "${dirs[@]}"
-#   do
-#     cd $i
-#     git pull origin master
-#     git rebase origin/master
-#     cd ../
-#   done
-# 
-# cd ../../
-#fi
-#}
-
 
 case $choice in
 [1]*)
