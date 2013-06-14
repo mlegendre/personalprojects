@@ -1,6 +1,6 @@
 #!/bin/bash
-
-
+#Global Variables
+UP_DIR = cd ..
 
 
 echo "What do you want to do?"
@@ -13,8 +13,6 @@ echo "Press 6 to exit"
 read choice
 
 #This function iterates through the different plugins and updates them
-
-
 function change_dir() {
 cd vendor/plugins
 
@@ -29,7 +27,6 @@ dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "anal
       git rebase origin/master
       cd ../
    done
- cd ../../
 else 
 echo "################################################################"
 echo "You seem to be missing plugins, I will now install those for you"
@@ -60,7 +57,7 @@ echo "I am now going to update your plugins"
 echo "####################################"
 
 change_dir 
-
+cd ../../
 echo "############################################"
 echo "Running a database migrate and bundle update"
 echo "############################################"
@@ -130,6 +127,7 @@ echo "I am now going to update your plugins"
 echo "#####################################"
 
 change_dir 
+cd ../../
 
 bundle update
 bundle exec rake db:migrate
