@@ -24,6 +24,7 @@ dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "anal
    for i in "${dirs[@]}"
     do
       cd $i
+      git checkout master
       git pull origin master
       git rebase origin/master
       cd ../
