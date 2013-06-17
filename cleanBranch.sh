@@ -156,7 +156,7 @@ bundle exec script/delayed_job start
 echo "###########################"
 echo "Starting up your server now"
 echo "###########################"
-bundle exec script/server
+bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 ;;
 
 [3]*)
