@@ -12,6 +12,21 @@ echo "Press 5 to just update your master branch"
 echo "Press 6 to exit"
 read choice
 
+#This function starts up the script/server
+function start_server() {
+
+echo "###################################################"
+echo "Stopping and then Starting up your delayed jobs now"
+echo "###################################################"
+
+bundle exec script/delayed_job stop
+bundle exec script/delayed_job start
+echo "###########################"
+echo "Starting up your server now"
+echo "###########################"
+bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+}
+
 #This function iterates through the different plugins and updates them
 function change_dir() {
 cd vendor/plugins
@@ -146,17 +161,17 @@ else
     bundle exec rake canvas:compile_assets[false]
 fi
 
+start_server
+#echo "###################################################"
+#echo "Stopping and then Starting up your delayed jobs now"
+#echo "###################################################"
 
-echo "###################################################"
-echo "Stopping and then Starting up your delayed jobs now"
-echo "###################################################"
-
-bundle exec script/delayed_job stop
-bundle exec script/delayed_job start
-echo "###########################"
-echo "Starting up your server now"
-echo "###########################"
-bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+#bundle exec script/delayed_job stop
+#bundle exec script/delayed_job start
+#echo "###########################"
+#echo "Starting up your server now"
+#echo "###########################"
+#bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 ;;
 
 [3]*)
@@ -214,10 +229,7 @@ echo "############################################"
 bundle exec rake db:migrate
 bundle update
 
-echo "##################################"
-echo "You are ready to checkout a commit"
-echo "##################################"
-
+start_server
 	
 ;;
 esac
