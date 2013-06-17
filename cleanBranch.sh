@@ -28,6 +28,7 @@ bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 }
 
 #This function iterates through the different plugins and updates them
+
 function change_dir() {
 cd vendor/plugins
 
@@ -221,7 +222,7 @@ echo "I am now going to update your plugins"
 echo "####################################"
 
 change_dir 
-
+cd ../../
 echo "############################################"
 echo "Running a database migrate and bundle update"
 echo "############################################"
