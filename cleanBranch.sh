@@ -38,8 +38,9 @@ dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "anal
    for i in "${dirs[@]}"
     do
       cd $i
+      git reset --hard
       git checkout master
-      git pull origin master
+      git pull origin master 
       git rebase origin/master
       cd ../
    done
@@ -66,7 +67,7 @@ echo "##########################################################################
 
 git checkout master
 git branch | grep -v 'master$' | xargs git branch -D
-git pull
+git pull origin master
 
 echo "####################################"
 echo "I am now going to update your plugins"
@@ -102,7 +103,7 @@ then
   read num_patchsets
 
   git checkout master
-  git pull
+  git pull origin master 
   
   i=1
   while [ $i -le $num_patchsets ]; do
@@ -215,7 +216,7 @@ bundle update
 ;;
 [5]*)
 git checkout master
-git pull
+git pull origin master
 
 echo "####################################"
 echo "I am now going to update your plugins"
