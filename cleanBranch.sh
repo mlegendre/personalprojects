@@ -101,10 +101,11 @@ then
   echo "How many patchsets did you want to checkout?"
   echo "############################################"
   read num_patchsets
-
+  
+  git reset --hard
   git checkout master
   git pull origin master 
-  
+   
   i=1
   while [ $i -le $num_patchsets ]; do
   
