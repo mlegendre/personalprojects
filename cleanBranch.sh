@@ -32,18 +32,21 @@ bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 function change_dir() {
 cd vendor/plugins
 
-dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "account_reports" "demo_site" )
+dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
  if [ -e $dirs ]
  then
    for i in "${dirs[@]}"
     do
+      
       cd $i
       git reset --hard
       git checkout master
       git pull origin master 
       git rebase origin/master
       cd ../
+       
    done
+
 else 
 echo "################################################################"
 echo "You seem to be missing plugins, I will now install those for you"
@@ -101,11 +104,10 @@ then
   echo "How many patchsets did you want to checkout?"
   echo "############################################"
   read num_patchsets
-  
-  git reset --hard
+
   git checkout master
   git pull origin master 
-   
+  
   i=1
   while [ $i -le $num_patchsets ]; do
   
@@ -144,7 +146,9 @@ echo "#####################################"
 echo "I am now going to update your plugins"
 echo "#####################################"
 
-change_dir 
+
+change_dir
+git log -1
 cd ../../
 
 bundle update
@@ -225,12 +229,13 @@ echo "####################################"
 
 change_dir 
 cd ../../
+
 echo "############################################"
 echo "Running a database migrate and bundle update"
 echo "############################################"
-
-bundle exec rake db:migrate
 bundle update
+bundle exec rake db:migrate
+
 
 start_server
 	
