@@ -203,21 +203,26 @@ echo "#######################################"
 
 change_dir 
 
-cd vendor/plugins/$plugin
+cd $plugin
 
 echo "##########################################################"
 echo "Please give me the commit number that you want to checkout"
 echo "##########################################################"
 read commit
 
-git checkout origin master
+git pull origin master
 git fetch ssh://marc@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
 git checkout -b $commit
 
 
 
-bundle exec rake db:migrate
+
+cd ../../../
+git checkout master
+git pull origin master
 bundle update
+bundle exec rake db:migrate
+
 ;;
 [5]*)
 git checkout master
