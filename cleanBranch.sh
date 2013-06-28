@@ -84,7 +84,7 @@ echo "############################################"
 
 bundle exec rake db:migrate
 bundle update
-
+bundle exec rake canvas:compile_assets
 echo "##################################"
 echo "You are ready to checkout a commit"
 echo "##################################"
@@ -222,7 +222,7 @@ git checkout master
 git pull origin master
 bundle update
 bundle exec rake db:migrate
-
+bundle exec rake canvas:compile_assets
 ;;
 [5]*)
 git checkout master
@@ -240,6 +240,7 @@ echo "Running a database migrate and bundle update"
 echo "############################################"
 bundle update
 bundle exec rake db:migrate
+bundle exec rake canvas:compile_assets
 
 
 start_server
