@@ -84,7 +84,7 @@ echo "############################################"
 
 bundle exec rake db:migrate
 bundle update
-bundle exec rake canvas:compile_assets
+bundle exec rake canvas:compile_assets[false]
 echo "##################################"
 echo "You are ready to checkout a commit"
 echo "##################################"
