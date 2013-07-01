@@ -30,34 +30,59 @@ bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 #This function iterates through the different plugins and updates them
 
 function change_dir() {
+
 cd vendor/plugins
 
-dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
- if [ -e $dirs ]
- then
+dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "canvalytics" "demo_site" )
+
+
    for i in "${dirs[@]}"
-    do
-      
-      cd $i
-      git reset --hard
-      git checkout master
-      git pull origin master 
-      git rebase origin/master
-      cd ../
-       
-   done
+     do
+       if [ -e $i ]
+         then
+             cd $i
+             git reset --hard
+             git checkout master
+             git pull origin master
+             git rebase origin/master
+             cd ../
+         else
+           echo "#####################################################################"
+           echo "You seem to be missing the $i plugin, I will now install this for you"
+           echo "#####################################################################"
+           git clone ssh://marc@gerrit.instructure.com:29418/$i.git
+       fi
+      done
 
-else 
-echo "################################################################"
-echo "You seem to be missing plugins, I will now install those for you"
-echo "################################################################"
-  for i in "${dirs[@]}"
-    do
-     git clone ssh://marc@gerrit.instructure.com:29418/$i.git
-    done
 
-    cd ../../
-fi
+#cd vendor/plugins
+#
+#dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
+# if [ -e $dirs ]
+# then
+#   for i in "${dirs[@]}"
+#    do
+#      
+#      cd $i
+#      git reset --hard
+#      git checkout master
+#      git pull origin master 
+#      git rebase origin/master
+#      cd ../
+#       
+#   done
+#
+#else 
+#echo "################################################################"
+#echo "You seem to be missing plugins, I will now install those for you"
+#echo "################################################################"
+#  for i in "${dirs[@]}"
+#    do
+#     git clone ssh://marc@gerrit.instructure.com:29418/$i.git
+#    done
+#
+#    cd ../../
+#fi
 }
 
 case $choice in
@@ -148,7 +173,6 @@ echo "#####################################"
 
 
 change_dir
-git log -1
 cd ../../
 
 bundle update
