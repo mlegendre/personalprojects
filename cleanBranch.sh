@@ -2,6 +2,9 @@
 #Global Variables
 NAME="marc"
 
+
+
+
 echo "What do you want to do?"
 echo "Press 1 to delete your branches and start from scratch"
 echo "Press 2 to checkout a commit"
@@ -214,8 +217,7 @@ bundle update
 bundle exec rake db:migrate
 bundle exec rake canvas:compile_assets[false] 
 
-
-start_server
+print_dash "You are now ready to check out a commit"
 	
 ;;
 esac
