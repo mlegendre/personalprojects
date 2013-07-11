@@ -1,6 +1,6 @@
 #!/bin/bash
 #Global Variables
-
+NAME="marc"
 
 echo "What do you want to do?"
 echo "Press 1 to delete your branches and start from scratch"
@@ -39,13 +39,11 @@ bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 }
 
 #This function iterates through the different plugins and updates them
-
+#It now takes into account the analytics plugin 
 function change_dir() {
 cd vendor/plugins
-#TODO make analytics work, you will need to checkout canvalytics but then change the name of the
-#plugin to analytics
-dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "demo_site" )
-   
+dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
+
      for i in "${dirs[@]}"
      do
        if [ -e $i ]
@@ -57,10 +55,14 @@ dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "demo
              git rebase origin/master
              cd ../
          else
-           
-           print_dash "You seem to be missing the $i plugin, I will now install this for you"
-           
-	   git clone ssh://marc@gerrit.instructure.com:29418/$i.git
+           if [ $i == "analytics" ]
+             then 
+               print_dash "You seem to be missing the $i plugin, I will now install this for you"
+               git clone ssh://$NAME@gerrit.instructure.com:29418/canvalytics.git analytics
+            else
+               print_dash "You seem to be missing the $i plugin, I will now install this for you"
+               git clone ssh://$NAME@gerrit.instructure.com:29418/$i.git       
+           fi
        fi
       done
 }
@@ -115,14 +117,14 @@ then
      print_dash "What is the commit number for the first patchset?"
      
      read commit
-     git fetch ssh://marc@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD  
+     git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD  
      git checkout -b $commit 
    else
     
     print_dash "What is the commit number for patchset #$i?"
     
     read commit
-    git fetch ssh://marc@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git cherry-pick FETCH_HEAD
+    git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git cherry-pick FETCH_HEAD
    
    fi
   ((i ++))
@@ -134,7 +136,7 @@ else
   print_dash "Please give me the commit number that you want to checkout"
   read commit
 
-  git fetch ssh://marc@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
+  git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
   git checkout -b $commit
 fi
 
@@ -185,7 +187,7 @@ print_dash "Please give me the commit number that you want to checkout"
 read commit
 
 git pull origin master
-git fetch ssh://marc@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
+git fetch ssh://$NAME@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
 git checkout -b $commit
 
 
