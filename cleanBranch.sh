@@ -1,7 +1,7 @@
 #!/bin/bash
 #Global Variables
 NAME="marc"
-
+ROOT_DIR=$PWD
 
 
 
