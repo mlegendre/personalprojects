@@ -4,6 +4,7 @@ NAME="marc"
 ROOT_DIR=$PWD
 
 
+#Screwed up on this commit as well
 
 echo "What do you want to do?"
 echo "Press 1 to delete your branches and start from scratch"
@@ -45,7 +46,7 @@ bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 #It now takes into account the analytics plugin 
 function change_dir() {
 cd vendor/plugins
-dirs=( "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
+dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
 
      for i in "${dirs[@]}"
      do

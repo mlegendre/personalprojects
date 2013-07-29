@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 require 'csv'
-
+#Screwed up on the latest commit :(
 #Global/Constant Variables
 ASTERISK = "#######################################################################"
 ##########################################################
