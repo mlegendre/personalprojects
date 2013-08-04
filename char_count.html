@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	
+  <head>
+     <script language="javascript" type="text/javascript">
+	 function char_counter(){  
+           var text = document.getElementById("text_area").value;
+	   var answer_label = document.getElementById("ans_label");
+	   charlength = text.length;
+	   answer_label.innerHTML = charlength;	   
+	 }
+     </script> 
+  </head>
+  
+  <body>
+    <p>Please put in the amount of text you would like me to count the characters in.</p>
+    <textarea id="text_area" rows="4" cols="50" value="">
+    </textarea>
+    
+    <p> <button name="button" onclick="char_counter()">Count characters</button></p>
+    <p><label id="ans_label"  ></label></p>
+
+
+
+  </body>
+
+</html>

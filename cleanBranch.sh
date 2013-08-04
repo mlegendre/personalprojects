@@ -55,8 +55,7 @@ dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "
              cd $i
              git reset --hard
              git checkout master
-             git pull origin master
-             git rebase origin/master
+             git pull --rebase
              cd ../
          else
            if [ $i == "analytics" ]
