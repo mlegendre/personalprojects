@@ -68,18 +68,18 @@ for i in "${dirs[@]}"
        then
          if [ $i == "analytics" ]
           then
-            echo "You seem to be missing the $i plugin, I will now install this for you"
+            print_dash "You seem to be missing the $i plugin, I will now install this for you"
             git clone ssh://$NAME@gerrit.instructure.com:29418/canvalytics.git analytics
           else
             cd ..
-            echo "You seem to be missing the $i plugin, I will now install this for you"
+            print_dash "You seem to be missing the $i plugin, I will now install this for you"
             git init
             git clone ssh://$NAME@gerrit.instructure.com:29418/qti_migration_tool.git QTIMigrationTool
             ln -s $ROOT_DIR/vendor/QTIMigrationTool plugins/qti_migration_tool
             cd plugins
          fi
        else
-         echo "You seem to be missing the $i plugin, I will now install this for you"
+         print_dash "You seem to be missing the $i plugin, I will now install this for you"
          git clone ssh://$NAME@gerrit.instructure.com:29418/$i.git
        fi
      fi
@@ -104,7 +104,7 @@ git rebase origin/master
 print_dash "I am now going to update your plugins" 
 
 change_dir 
-cd ../../
+cd $ROOT_DIR
 
 print_dash "Running a database migrate and compiling your assets"
 
