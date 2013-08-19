@@ -5,7 +5,7 @@ ROOT_DIR=$PWD
 
 
 #Screwed up on this commit as well
-
+function menu(){
 echo "What do you want to do?"
 echo "Press 1 to delete your branches and start from scratch"
 echo "Press 2 to checkout a commit"
@@ -14,6 +14,8 @@ echo "Press 4 to checkout a branch on a plugin"
 echo "Press 5 to just update your master branch"
 echo "Press 6 to exit"
 read choice
+}
+
 
 function print_dash() {
   for (( x=0; x < ${#1}; x++ )); do
@@ -43,32 +45,49 @@ bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
 }
 
 #This function iterates through the different plugins and updates them
-#It now takes into account the analytics plugin 
+#It now takes into account the qti_migration_tool and analytics plugins 
+#function change_dir() {
+
 function change_dir() {
 cd vendor/plugins
+
 dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
 
-     for i in "${dirs[@]}"
-     do
-       if [ -e $i ]
-         then
-             cd $i
-             git reset --hard
-             git checkout master
-             git pull --rebase
-             cd ../
-         else
-           if [ $i == "analytics" ]
-             then 
-               print_dash "You seem to be missing the $i plugin, I will now install this for you"
-               git clone ssh://$NAME@gerrit.instructure.com:29418/canvalytics.git analytics
-            else
-               print_dash "You seem to be missing the $i plugin, I will now install this for you"
-               git clone ssh://$NAME@gerrit.instructure.com:29418/$i.git       
-           fi
+for i in "${dirs[@]}"
+  do
+    if [ -e $i ]
+    then
+      cd $i
+      git reset --hard
+      git checkout master
+      git fetch
+      git rebase origin/master
+      cd ../
+    else
+      if [ $i == "analytics" -o $i == "qti_migration_tool" ]
+       then
+         if [ $i == "analytics" ]
+          then
+            echo "You seem to be missing the $i plugin, I will now install this for you"
+            git clone ssh://$NAME@gerrit.instructure.com:29418/canvalytics.git analytics
+          else
+            cd ..
+            echo "You seem to be missing the $i plugin, I will now install this for you"
+            git init
+            git clone ssh://$NAME@gerrit.instructure.com:29418/qti_migration_tool.git QTIMigrationTool
+            ln -s $ROOT_DIR/vendor/QTIMigrationTool plugins/qti_migration_tool
+            cd plugins
+         fi
+       else
+         echo "You seem to be missing the $i plugin, I will now install this for you"
+         git clone ssh://$NAME@gerrit.instructure.com:29418/$i.git
        fi
-      done
+     fi
+ done
 }
+
+
+menu
 
 case $choice in
 [1]*)
@@ -79,20 +98,31 @@ print_dash "I am going to remove your old commits and checkout the newest code o
 git reset --hard
 git checkout master
 git branch | grep -v 'master$' | xargs git branch -D
-git pull origin master
+git fetch
+git rebase origin/master
 
-print_dash "I am now going to update your plugins"
+print_dash "I am now going to update your plugins" 
 
 change_dir 
 cd ../../
 
-print_dash "Running a database migrate and bundle update"
+print_dash "Running a database migrate and compiling your assets"
 
-bundle exec rake db:migrate
 bundle update
+bundle exec rake db:migrate
 bundle exec rake canvas:compile_assets[false]
 
 print_dash "You are ready to checkout a commit"
+
+print_dash "Would you like to do anything else?"
+read re_menu
+
+if [ $re_menu == y ];
+then
+  menu
+else
+  exit	
+fi
 ;;
 
 [2]*)
@@ -109,8 +139,8 @@ then
   read num_patchsets
 
   git checkout master
-  git pull origin master 
-  
+  git fetch 
+  git rebase origin/master
   i=1
   while [ $i -le $num_patchsets ]; do
   
@@ -189,7 +219,7 @@ cd $plugin
 print_dash "Please give me the commit number that you want to checkout"
 read commit
 
-git pull origin master
+git fetch
 git fetch ssh://$NAME@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
 git checkout -b $commit
 
@@ -198,14 +228,16 @@ git checkout -b $commit
 
 cd ../../../
 git checkout master
-git pull origin master
+git fetch
+git rebase origin/master
 bundle update
 bundle exec rake db:migrate
 bundle exec rake canvas:compile_assets[false]
 ;;
 [5]*)
 git checkout master
-git pull origin master
+git fetch
+git rebase origin/master
 
 print_dash "I am now going to update your plugins"
 
