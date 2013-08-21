@@ -177,7 +177,7 @@ print_dash "I am now going to update your plugins"
 
 
 change_dir
-cd ../../
+cd $ROOT_DIR
 
 bundle update
 bundle exec rake db:migrate
@@ -226,7 +226,7 @@ git checkout -b $commit
 
 
 
-cd ../../../
+cd $ROOT_DIR
 git checkout master
 git fetch
 git rebase origin/master
@@ -242,7 +242,7 @@ git rebase origin/master
 print_dash "I am now going to update your plugins"
 
 change_dir 
-cd ../../
+cd $ROOT_DIR
 
 print_dash "Running a database migrate and bundle update"
 bundle update
