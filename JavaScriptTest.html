@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1138.51">
+  <style type="text/css">
+  </style>
+<script type="text/javascript">
+  //Grab input from text box and change the color style of the changMe id  
+    function colorChange(form)
+    {
+      var color=form.color.value;
+      var oldColor=document.getElementById('changMe');
+      oldColor.setAttribute('style', 'color:' + color);
+
+    }
+
+    function magicTime(id)
+    {
+      var change = document.getElementById('disappear');
+
+      
+      change.setAttribute('style', 'display:none');
+    }
+
+    function arrayTest (form)
+    {
+      var color=form.colors.value;
+      var radios = document.getElementById('colors');
+      var oldColor = document.getElementById('changeThis');
+      
+      //This for statement cycles through the radio buttons to find which one is checked and then assigns that value to the p tag
+      for (var i=0; i < radios.length; i++)
+      {
+        if (radios[i].checked)
+        {
+           oldColor.setAttribute('style', 'color:' + color);
+        }
+      }
+    }
+  
+  </script>
+</head>
+<body>
+
+	<h2 id="changMe" >Choose a color you would like this text to change to</h2>
+	<form name="colorForm" action="" method="GET"><br />
+		Input a color and I will change the above text: <input type="text" name="color" value="Type a color here" onClick='this.value=""'>
+	<input type="button" name='button' value="Click" onClick="colorChange(this.form)">
+	</form>
+
+<hr />
+<br />
+
+<h2>It's magic time</h2>
+<p>If you hover over the <span id='disappear' onMouseOver='magicTime(this)' onMouseOut ><b>bolded</b></span> word you will see it disappear.</p>
+
+<hr />
+<br />
+
+
+<p id='changeThis'>Use the following radio buttons to change the color of this text</p>  
+<form name="colors">
+<input type="radio" id="colors" value="Click" onClick="arrayTest(this.form)">red<br />
+<input type="radio" id="colors" value="blue">blue<br />
+<input type="radio" id="colors" value="green">green<br />
+<input type="radio" id="colors" value="purple">purple<br />
+</form>
+
+
+</body>
+
+</html>

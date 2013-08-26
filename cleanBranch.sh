@@ -4,7 +4,10 @@ NAME="marc"
 ROOT_DIR=$PWD
 
 
-#Screwed up on this commit as well
+
+
+
+
 function menu(){
 echo "What do you want to do?"
 echo "Press 1 to delete your branches and start from scratch"
@@ -16,6 +19,11 @@ echo "Press 6 to exit"
 read choice
 }
 
+function kill_logs(){
+> delayed_job.log
+> development.log
+> production.log
+}
 
 function print_dash() {
   for (( x=0; x < ${#1}; x++ )); do
@@ -86,6 +94,7 @@ for i in "${dirs[@]}"
  done
 }
 
+kill_logs
 
 menu
 
