@@ -2,7 +2,7 @@
 require 'csv'
 #Screwed up on the latest commit :(
 #Global/Constant Variables
-ASTERISK = "#######################################################################"
+$asterisk = "#" * 10
 ##########################################################
 #(Method list)
 
@@ -70,46 +70,46 @@ end
 #Instantiate the Helper class
 helper=Helper.new()
 
-puts ASTERISK
+puts $asterisk
 puts "This is a tool to hold your tokens for testing just make sure not to reset your database\n or you will lose your tokens"
-puts ASTERISK
+puts $asterisk
 
 begin
 
-puts ASTERISK
+puts $asterisk
 puts "1.Read the users you have saved so far\n2.Add new users"
 puts "3.Delete a row\n4.Quit\n"
-puts ASTERISK
+puts $asterisk
 @choice=gets.chomp.to_i
 
   case @choice
     when 1 	    
       helper.print_users 
     when 2
-      puts ASTERISK
+      puts $asterisk
       puts "How many users did you want to save for now?"
       helper.num_token=gets.chomp.to_i
-      puts ASTERISK     
+      puts $asterisk     
       
       helper.loads_tokens_csv(@num_token)
 
       helper.write_to_csv(@loadcsv)
     when 3
       #Not pretty but works
-      puts ASTERISK
+      puts $asterisk
       puts "Here is what I have so far"
-      puts ASTERISK
+      puts $asterisk
       helper.print_users
-      puts ASTERISK
+      puts $asterisk
       puts "Please give me the number you would like me to remove"
-      puts ASTERISK
+      puts $asterisk
       helper.delete_row = gets.chomp.to_i
 
       helper.delete_user(@load_csv,@delete_row)
 
   else
-      puts ASTERISK	  
+      puts $asterisk	  
       puts "Exiting"
-      puts ASTERISK
+      puts $asterisk
   end 
 end until @choice == 4
