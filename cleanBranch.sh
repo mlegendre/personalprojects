@@ -85,6 +85,7 @@ function continue_on_question(){
    then
     continue_on  
   else
+    cd $ROOT_DIR
     update_migrate_compile
     start_server	
   fi
@@ -123,7 +124,7 @@ function update_migrate_compile(){
 
   bundle update
   bundle exec rake db:migrate
-  bundle exec rake canvas:compile_assets[false]
+  assets_question
 }
 
 # This method checks out multiple patchsets
@@ -177,10 +178,16 @@ function single_checkout(){
 }
 
 function checkout_plugin(){
+  
   print_dash "What is the name of the plugin that you are going to checkout?"
   read plugin
-
-  cd $plugin
+  
+  if [ $PWD == $ROOT_DIR ];
+   then
+     cd $ROOT_DIR/vendor/plugins/$plugin
+   else
+     cd $plugin
+   fi
 
   print_dash "Please give me the commit number that you want to checkout"
   read commit
@@ -200,7 +207,7 @@ function change_dir() {
 
   dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
 
-  for i in "${dirs[@]}"
+ for i in "${dirs[@]}"
     do
       if [ -e $i ]
        then
@@ -239,7 +246,7 @@ function change_dir() {
 
   case $choice in
     [1]*)
-
+    #This is the clear old commits and update master option
       clear_commits
       
       change_dir 
@@ -249,6 +256,7 @@ function change_dir() {
       continue_on_question
     ;;
     [2]*)
+    #This is the multiple commits option
       multiple_patchsets
       
       change_dir
@@ -256,19 +264,19 @@ function change_dir() {
       cd $ROOT_DIR
       
       continue_on_question
-
-      assets_question
     ;;
     [3]*)
-
+    #This shows the git log of the most recent commits
       print_dash "How many commits do you have checked out?"
     
       read num_commits
 
       git log -$num_commits
+
+      continue_on_quesiton
     ;;
     [4]*)
-
+    #This is the checkout a plugin commit option
       change_dir 
 
       checkout_plugin
@@ -277,19 +285,17 @@ function change_dir() {
 
       checkout_master
 
-      update_migrate_compile
+      continue_on_question 
     ;;
     [5]*)
-
+    #This is the update master only option
       checkout_master
 
       change_dir 
       
       cd $ROOT_DIR
 
-      update_migrate_compile
-
-     continue_on_question
+      continue_on_question
     ;;
   esac
 
