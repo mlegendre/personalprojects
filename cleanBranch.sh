@@ -43,7 +43,12 @@ function print_dash() {
 # This function asks the user whether they want to generate new api documents
 function assets_question(){
   print_dash "Do you want to generate new API Documents y/n?"
-  read api_answer
+  read -t 5 api_answer
+
+  if [ -z "$api_answer" ]
+    then
+      api_answer="n"
+  fi
 
   if [ "$api_answer" == "y" ]; 
    then
@@ -79,7 +84,12 @@ function clear_commits(){
 # This function asks the user if they would like to do anything else before starting up the server
 function continue_on_question(){
   print_dash "Would you like to do anything else?"
-  read re_menu
+  read -t 5 re_menu
+
+  if [ -z "$re_menu" ]
+    then
+      re_menu="n"
+  fi
 
   if [ "$re_menu" == "y" ];
    then
@@ -131,6 +141,11 @@ function update_migrate_compile(){
 multiple_patchsets(){
   print_dash "Would you like to checkout multiple patchsets?"
   read multi_patch
+
+  if [ -z "$multi_patch" ]
+    then
+     multi_patch="n"
+  fi
 
   if [ "$multi_patch" == "y" ];
    then
