@@ -43,7 +43,7 @@ function print_dash() {
 # This function asks the user whether they want to generate new api documents
 function assets_question(){
   print_dash "Do you want to generate new API Documents y/n?"
-  read -t 5 api_answer
+  read -t 10 api_answer
 
   if [ -z "$api_answer" ]
     then
@@ -84,7 +84,7 @@ function clear_commits(){
 # This function asks the user if they would like to do anything else before starting up the server
 function continue_on_question(){
   print_dash "Would you like to do anything else?"
-  read -t 5 re_menu
+  read -t 10 re_menu
 
   if [ -z "$re_menu" ]
     then
@@ -93,6 +93,7 @@ function continue_on_question(){
 
   if [ "$re_menu" == "y" ];
    then
+    cd $ROOT_DIR
     continue_on  
   else
     cd $ROOT_DIR
@@ -123,6 +124,7 @@ function continue_on(){
 
 # This function checks out master and updates the repro
 function checkout_master(){
+  git reset --hard
   git checkout master
   git fetch
   git rebase origin/master
@@ -131,7 +133,7 @@ function checkout_master(){
 # This function updates gems, migrates the database, and compiles assets 
 function update_migrate_compile(){
   print_dash "Running a database migrate and compiling your assets"
-
+  
   bundle update
   bundle exec rake db:migrate
   assets_question
@@ -152,7 +154,6 @@ multiple_patchsets(){
     print_dash "How many patchsets did you want to checkout?"  
     read num_patchsets
 
-    checkout_master
 
   i=1
   while [ $i -le $num_patchsets ]; do  
@@ -227,8 +228,6 @@ function change_dir() {
       if [ -e $i ]
        then
         cd $i
-        git reset --hard
-
         checkout_master
 
         cd ../
@@ -272,10 +271,13 @@ function change_dir() {
     ;;
     [2]*)
     #This is the multiple commits option
-      multiple_patchsets
+     
+      checkout_master
       
       change_dir
-      
+     
+      multiple_patchsets
+       
       cd $ROOT_DIR
       
       continue_on_question
@@ -292,13 +294,13 @@ function change_dir() {
     ;;
     [4]*)
     #This is the checkout a plugin commit option
+      checkout_master
+
       change_dir 
 
       checkout_plugin
 
       cd $ROOT_DIR
-
-      checkout_master
 
       continue_on_question 
     ;;
