@@ -141,9 +141,10 @@ function update_migrate_compile(){
 
 # This method checks out multiple patchsets
 multiple_patchsets(){
+  
   print_dash "Would you like to checkout multiple patchsets?"
   read multi_patch
-
+  
   if [ -z "$multi_patch" ]
     then
      multi_patch="n"
@@ -153,8 +154,9 @@ multiple_patchsets(){
    then
     print_dash "How many patchsets did you want to checkout?"  
     read num_patchsets
+     
 
-
+    
   i=1
   while [ $i -le $num_patchsets ]; do  
    if [ $i == 1 ]
@@ -276,10 +278,10 @@ function change_dir() {
       
       change_dir
      
-      multiple_patchsets
-       
       cd $ROOT_DIR
       
+      multiple_patchsets
+       
       continue_on_question
     ;;
     [3]*)
