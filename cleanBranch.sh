@@ -64,10 +64,8 @@ function start_server() {
 
   bundle exec script/delayed_job stop
   bundle exec script/delayed_job start
-
-  print_dash "Starting up your server now"
-
-  bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+  
+  i18n_test
 }
 
 # This fucntion deletes old commits and checkouts out master code
@@ -128,6 +126,27 @@ function checkout_master(){
   git checkout master
   git fetch
   git rebase origin/master
+}
+
+# This function asks if you would like to test i18n strings
+function i18n_test(){
+  print_dash "Starting up your server now"
+  
+  print_dash "Would you like to test i18n strings?"
+  read -t 10 i18n_answer
+
+  if [ -z "i18n_answer" ];
+    then
+     i18n_answer="n"
+  fi
+
+  if [ "$i18n_answer" == "y" ];
+    then
+      LOLCALIZE=true USE_OPTIMIZED_JS=true bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+    else
+      bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+  fi
+ 
 }
 
 # This function updates gems, migrates the database, and compiles assets 
