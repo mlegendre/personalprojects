@@ -212,6 +212,8 @@ function single_checkout(){
 
   git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
   git checkout -b $commit
+
+  git rebase origin/master
 }
 
 function checkout_plugin(){
@@ -337,3 +339,9 @@ function change_dir() {
     ;;
   esac
 
+#Funcitons that are common regardless of project
+#function kill_logs
+#function print_dash()
+#function clear_commits()
+#function checkout_master()
+#function update_migrate_compile()
