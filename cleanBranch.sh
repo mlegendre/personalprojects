@@ -212,15 +212,13 @@ function single_checkout(){
 
   git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
   git checkout -b $commit
-
-  git rebase origin/master
 }
 
 function checkout_plugin(){
-  
+
   print_dash "What is the name of the plugin that you are going to checkout?"
   read plugin
-  
+
   if [ $PWD == $ROOT_DIR ];
    then
      cd $ROOT_DIR/vendor/plugins/$plugin
@@ -237,12 +235,12 @@ function checkout_plugin(){
 }
 
 # This function iterates through the different plugins and updates them
-# It now takes into account the qti_migration_tool and analytics plugins 
+# It now takes into account the qti_migration_tool and analytics plugins
 # function change_dir() {
 function change_dir() {
   cd vendor/plugins
 
-  print_dash "I am now going to update your plugins" 
+  print_dash "I am now going to update your plugins"
 
   dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
 
@@ -277,6 +275,51 @@ function change_dir() {
   done
 }
 
+function redis_check(){
+  #brew info redis | grep usr/local/Cellar
+  redis_launchctl="~/Library/LaunchAgents/homebrew.mxcl.redis.plist"
+  redis_install_dir=/usr/local/Cellar/redis
+
+  if [ -d "$redis_install_dir" ];
+    then
+      if [[ ! -L "$redis_launchctl" ]];
+        then
+
+          launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+          launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+      else
+
+          ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
+          launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+      fi
+  else
+    print_dash "You do not seem to have redis installed, wait while I do that for you"
+
+    brew install redis
+
+    ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
+
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+
+    cp config/cache_store.yml.example config/cache_store.yml
+
+    cp config/redis.yml.example config/redis.yml
+
+    printf "development:
+  servers:
+    - redis: //localhost
+  database: 1" >> config/redis.yml
+
+   sed -i.bak 's/# cache_store: redis_store/cache_store: redis_store/' config/cache_store.yml
+
+   rm config/cache_store.yml.bak
+
+  fi
+}
+
+
+  redis_check
+
   kill_logs
 
   menu
@@ -285,30 +328,30 @@ function change_dir() {
     [1]*)
     #This is the clear old commits and update master option
       clear_commits
-      
-      change_dir 
-      
+
+      change_dir
+
       cd $ROOT_DIR
-      
+
       continue_on_question
     ;;
     [2]*)
     #This is the multiple commits option
-     
+
       checkout_master
-      
+
       change_dir
-     
+
       cd $ROOT_DIR
-      
+
       multiple_patchsets
-       
+
       continue_on_question
     ;;
     [3]*)
     #This shows the git log of the most recent commits
       print_dash "How many commits do you have checked out?"
-    
+
       read num_commits
 
       git log -$num_commits
@@ -319,29 +362,23 @@ function change_dir() {
     #This is the checkout a plugin commit option
       checkout_master
 
-      change_dir 
+      change_dir
 
       checkout_plugin
 
       cd $ROOT_DIR
 
-      continue_on_question 
+      continue_on_question
     ;;
     [5]*)
     #This is the update master only option
       checkout_master
 
-      change_dir 
-      
+      change_dir
+
       cd $ROOT_DIR
 
       continue_on_question
     ;;
   esac
 
-#Funcitons that are common regardless of project
-#function kill_logs
-#function print_dash()
-#function clear_commits()
-#function checkout_master()
-#function update_migrate_compile()
