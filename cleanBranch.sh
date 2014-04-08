@@ -102,11 +102,15 @@ function continue_on_question(){
 
 # This case statement will let the user continue on to either add more commits or checkout plugin patchsets
 function continue_on(){
-  echo "########################################"
-  echo "Press 1 to checkout a commit(s)"
-  echo "Press 2 to checkout a branch on a plugin"
-  echo "########################################"
-  read non_default_menu_answer
+
+  until [[ $non_default_menu_answer -eq 1 ]] || [[ $non_default_menu_answer -eq 2 ]]
+  do
+    echo "########################################"
+    echo "Press 1 to checkout a commit(s)"
+    echo "Press 2 to checkout a branch on a plugin"
+    echo "########################################"
+    read non_default_menu_answer
+  done
 
   case $non_default_menu_answer in
     [1]*)
@@ -117,7 +121,9 @@ function continue_on(){
       checkout_plugin
       continue_on_question
     ;;
-  esac	
+  esac
+
+
 }
 
 # This function checks out master and updates the repro
@@ -152,14 +158,13 @@ function i18n_test(){
 # This function updates gems, migrates the database, and compiles assets 
 function update_migrate_compile(){
   print_dash "Running a database migrate and compiling your assets"
-  
+
   bundle update
   bundle exec rake db:migrate
   assets_question
 }
-
 # This method checks out multiple patchsets
-multiple_patchsets(){
+function multiple_patchsets(){
   
   print_dash "Would you like to checkout multiple patchsets?"
   read multi_patch
@@ -314,6 +319,18 @@ function redis_check(){
 
    rm config/cache_store.yml.bak
 
+  fi
+}
+
+function error_check(){
+
+  some_function=$1
+
+  is_error=$(echo $?)
+
+  if [ $is_error != 0 ];then
+    echo "There was an error at line: $LINENO"
+    exit 0
   fi
 }
 
