@@ -64,7 +64,7 @@ function assets_question(){
 }
 
 # This function starts up the script/server
-function start_server() {
+function start_delayed_job() {
   print_dash "Stopping and then Starting up your delayed jobs now"
 
   bundle exec script/delayed_job stop
@@ -101,7 +101,7 @@ function continue_on_question(){
   else
     cd $ROOT_DIR
     update_migrate_compile
-    start_server	
+    start_delayed_job
   fi
 }
 
@@ -139,10 +139,27 @@ function checkout_master(){
   git rebase origin/master
 }
 
+function check_for_address_in_use(){
+  #TODO If the ip address is in use find a way to kill the process and start the server back up
+  if [[ "stub" ]];
+   then
+     echo "do something cool"
+  fi
+}
+
+function error_stop_process(){
+  #TODO find a way to stop the script and output the process that failed
+  process_problem=$(fc -ln -1)
+
+  if [[ "$?" > 0 ]];
+   then
+    echo "There was an error, stopping the script. Check $process_problem"
+  fi
+}
+
 # This function asks if you would like to test i18n strings
 function i18n_test(){
   print_dash "Starting up your server now"
-  
   print_dash "Would you like to test i18n strings?"
   read -t 10 i18n_answer
 
@@ -167,7 +184,7 @@ function update_migrate_compile(){
   bundle update
   bundle exec rake db:migrate
 
-  if [ "$?" == 0 ];
+  if [[ "$?" > 0 ]];
    then
     echo "There was a problem with migrating your database you need to manually figure out what happened"
     exit 0
@@ -225,7 +242,7 @@ fi
 }
 
 function duplicated_patchsets(){
-  if [ "$?" == 0 ];
+  if [[ "$?" > 0 ]];
    then
      echo "There was a duplicate patchset"
 
@@ -352,19 +369,6 @@ function redis_check(){
 
   fi
 }
-
-function error_check(){
-
-  some_function=$1
-
-  is_error=$(echo $?)
-
-  if [ $is_error != 0 ];then
-    echo "There was an error at line: $LINENO"
-    exit 0
-  fi
-}
-
 
   redis_check
 
