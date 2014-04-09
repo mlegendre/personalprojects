@@ -4,47 +4,6 @@ NAME="marc"
 ROOT_DIR=$PWD
 PROJECT=""
 
-# The menu found at the beginning of the program
-function menu(){
-
-  until [[ $choice -le 6 ]] && [[ $choice > 0 ]]
-  do
-    echo "What do you want to do?"
-    echo "Press 1 to delete your branches and start from scratch"
-    echo "Press 2 to checkout a commit"
-    echo "Press 3 to see what commit you are on and checkout a previous commit"
-    echo "Press 4 to checkout a branch on a plugin"
-    echo "Press 5 to just update your master branch"
-    echo "Press 6 to exit"
-    read choice
-  done
-}
-
-# This function just zeroes out the logs since they are constantly being written and the space adds up
-function kill_logs(){
-  cd log
-
-  > delayed_job.log
-  > development.log
-  > production.log
-
-  cd $ROOT_DIR 
-}
-
-# This function just prints ### to match whatever text is give to it
-function print_dash() {
-  for (( x=0; x < ${#1}; x++ )); do
-    printf "#"
-  done
-  echo ""
-  printf "$1"
-  echo ""
-     for (( x=0; x < ${#1}; x++ )); do
-     printf "#"
-  done
-  echo ""
-}
-
 # This function asks the user whether they want to generate new api documents
 function assets_question(){
   print_dash "Do you want to generate new API Documents y/n?"
@@ -55,22 +14,91 @@ function assets_question(){
       api_answer="n"
   fi
 
-  if [ "$api_answer" == "y" ]; 
+  if [ "$api_answer" == "y" ];
    then
       bundle exec rake canvas:compile_assets
-   else 
+   else
       bundle exec rake canvas:compile_assets[false]
   fi
 }
 
-# This function starts up the script/server
-function start_delayed_job() {
-  print_dash "Stopping and then Starting up your delayed jobs now"
+# This function iterates through the different plugins and updates them
+# It now takes into account the qti_migration_tool and analytics plugins
+# function change_dir() {
+function change_dir() {
+  cd vendor/plugins
 
-  bundle exec script/delayed_job stop
-  bundle exec script/delayed_job start
-  
-  i18n_test
+  print_dash "I am now going to update your plugins"
+
+  dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
+
+ for i in "${dirs[@]}"
+    do
+      if [ -e $i ]
+       then
+        cd $i
+        checkout_master
+
+        cd ../
+      else
+        if [ $i == "analytics" -o $i == "qti_migration_tool" ]
+         then
+           if [ $i == "analytics" ]
+            then
+             print_dash "You seem to be missing the $i plugin, I will now install this for you"
+             git clone ssh://$NAME@gerrit.instructure.com:29418/canvalytics.git analytics
+           else
+             cd ..
+             print_dash "You seem to be missing the $i plugin, I will now install this for you"
+             git init
+             git clone ssh://$NAME@gerrit.instructure.com:29418/qti_migration_tool.git QTIMigrationTool
+             ln -s $ROOT_DIR/vendor/QTIMigrationTool plugins/qti_migration_tool
+             cd plugins
+           fi
+         else
+           print_dash "You seem to be missing the $i plugin, I will now install this for you"
+           git clone ssh://$NAME@gerrit.instructure.com:29418/$i.git
+        fi
+      fi
+  done
+}
+
+function check_for_address_in_use(){
+  #TODO If the ip address is in use find a way to kill the process and start the server back up
+  if [[ "stub" ]];
+   then
+     echo "do something cool"
+  fi
+}
+
+# This function checks out master and updates the repro
+function checkout_master(){
+  git reset --hard
+  git checkout master
+  git fetch
+  git rebase origin/master
+}
+
+function checkout_plugin(){
+
+  print_dash "What is the name of the plugin that you are going to checkout?"
+  read plugin
+
+  if [ $PWD == $ROOT_DIR ];
+   then
+     cd $ROOT_DIR/vendor/plugins/$plugin
+   else
+     cd $plugin
+   fi
+
+  print_dash "Please give me the commit number that you want to checkout"
+  read commit
+
+  git fetch
+  git fetch ssh://$NAME@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
+  git checkout -b $commit
+
+  duplicated_patchsets
 }
 
 # This fucntion deletes old commits and checkouts out master code
@@ -127,23 +155,16 @@ function continue_on(){
       continue_on_question
     ;;
   esac
-
-
 }
 
-# This function checks out master and updates the repro
-function checkout_master(){
-  git reset --hard
-  git checkout master
-  git fetch
-  git rebase origin/master
-}
-
-function check_for_address_in_use(){
-  #TODO If the ip address is in use find a way to kill the process and start the server back up
-  if [[ "stub" ]];
+function duplicated_patchsets(){
+  if [[ "$?" > 0 ]];
    then
-     echo "do something cool"
+     echo "There was a duplicate patchset"
+
+     git branch -D $commit
+
+     git checkout -b $commit
   fi
 }
 
@@ -177,20 +198,33 @@ function i18n_test(){
  
 }
 
-# This function updates gems, migrates the database, and compiles assets 
-function update_migrate_compile(){
-  print_dash "Running a database migrate and compiling your assets"
+# This function just zeroes out the logs since they are constantly being written and the space adds up
+function kill_logs(){
+  cd log
 
-  bundle update
-  bundle exec rake db:migrate
+  > delayed_job.log
+  > development.log
+  > production.log
 
-  if [[ "$?" > 0 ]];
-   then
-    echo "There was a problem with migrating your database you need to manually figure out what happened"
-    exit 0
-  fi
-  assets_question
+  cd $ROOT_DIR
 }
+
+# The menu found at the beginning of the program
+function menu(){
+
+  until [[ $choice -le 6 ]] && [[ $choice > 0 ]]
+  do
+    echo "What do you want to do?"
+    echo "Press 1 to delete your branches and start from scratch"
+    echo "Press 2 to checkout a commit"
+    echo "Press 3 to see what commit you are on and checkout a previous commit"
+    echo "Press 4 to checkout a branch on a plugin"
+    echo "Press 5 to just update your master branch"
+    echo "Press 6 to exit"
+    read choice
+  done
+}
+
 # This method checks out multiple patchsets
 function multiple_patchsets(){
   
@@ -206,9 +240,7 @@ function multiple_patchsets(){
    then
     print_dash "How many patchsets did you want to checkout?"  
     read num_patchsets
-     
 
-    
   i=1
   while [ $i -le $num_patchsets ]; do  
    if [ $i == 1 ]
@@ -241,91 +273,18 @@ single_checkout
 fi
 }
 
-function duplicated_patchsets(){
-  if [[ "$?" > 0 ]];
-   then
-     echo "There was a duplicate patchset"
-
-     git branch -D $commit
-
-     git checkout -b $commit
-  fi
-
-}
-
-# This function just checks out one patchset 
-function single_checkout(){
-  print_dash "Please give me the commit number that you want to checkout"
-  read commit
-
-  git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
-  git checkout -b $commit
-
-  duplicated_patchsets
-
-}
-
-function checkout_plugin(){
-
-  print_dash "What is the name of the plugin that you are going to checkout?"
-  read plugin
-
-  if [ $PWD == $ROOT_DIR ];
-   then
-     cd $ROOT_DIR/vendor/plugins/$plugin
-   else
-     cd $plugin
-   fi
-
-  print_dash "Please give me the commit number that you want to checkout"
-  read commit
-
-  git fetch
-  git fetch ssh://$NAME@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
-  git checkout -b $commit
-
-  duplicated_patchsets
-}
-
-# This function iterates through the different plugins and updates them
-# It now takes into account the qti_migration_tool and analytics plugins
-# function change_dir() {
-function change_dir() {
-  cd vendor/plugins
-
-  print_dash "I am now going to update your plugins"
-
-  dirs=( "qti_migration_tool" "multiple_root_accounts" "instructure_misc_plugin" "migration_tool" "analytics" "demo_site" )
-
- for i in "${dirs[@]}"
-    do
-      if [ -e $i ]
-       then
-        cd $i
-        checkout_master
-
-        cd ../
-      else
-        if [ $i == "analytics" -o $i == "qti_migration_tool" ]
-         then
-           if [ $i == "analytics" ]
-            then
-             print_dash "You seem to be missing the $i plugin, I will now install this for you"
-             git clone ssh://$NAME@gerrit.instructure.com:29418/canvalytics.git analytics
-           else
-             cd ..
-             print_dash "You seem to be missing the $i plugin, I will now install this for you"
-             git init
-             git clone ssh://$NAME@gerrit.instructure.com:29418/qti_migration_tool.git QTIMigrationTool
-             ln -s $ROOT_DIR/vendor/QTIMigrationTool plugins/qti_migration_tool
-             cd plugins
-           fi
-         else
-           print_dash "You seem to be missing the $i plugin, I will now install this for you"
-           git clone ssh://$NAME@gerrit.instructure.com:29418/$i.git
-        fi
-      fi
+# This function just prints ### to match whatever text is give to it
+function print_dash() {
+  for (( x=0; x < ${#1}; x++ )); do
+    printf "#"
   done
+  echo ""
+  printf "$1"
+  echo ""
+     for (( x=0; x < ${#1}; x++ )); do
+     printf "#"
+  done
+  echo ""
 }
 
 function redis_check(){
@@ -369,6 +328,44 @@ function redis_check(){
 
   fi
 }
+
+# This function just checks out one patchset
+function single_checkout(){
+  print_dash "Please give me the commit number that you want to checkout"
+  read commit
+
+  git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
+  git checkout -b $commit
+
+  duplicated_patchsets
+}
+
+# This function starts up the script/server
+function start_delayed_job() {
+  print_dash "Stopping and then Starting up your delayed jobs now"
+
+  bundle exec script/delayed_job stop
+  bundle exec script/delayed_job start
+
+  i18n_test
+}
+
+# This function updates gems, migrates the database, and compiles assets
+function update_migrate_compile(){
+  print_dash "Running a database migrate and compiling your assets"
+
+  bundle update
+  bundle exec rake db:migrate
+
+  if [[ "$?" > 0 ]];
+   then
+    echo "There was a problem with migrating your database you need to manually figure out what happened"
+    exit 0
+  fi
+  assets_question
+}
+
+####################BEGIN MAIN METHODS###################################
 
   redis_check
 
