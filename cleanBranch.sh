@@ -2,17 +2,22 @@
 # Global Variables
 NAME="marc"
 ROOT_DIR=$PWD
+PROJECT=""
 
 # The menu found at the beginning of the program
 function menu(){
-  echo "What do you want to do?"
-  echo "Press 1 to delete your branches and start from scratch"
-  echo "Press 2 to checkout a commit"
-  echo "Press 3 to see what commit you are on and checkout a previous commit"
-  echo "Press 4 to checkout a branch on a plugin"
-  echo "Press 5 to just update your master branch"
-  echo "Press 6 to exit"
-  read choice
+
+  until [[ $choice -le 6 ]] && [[ $choice > 0 ]]
+  do
+    echo "What do you want to do?"
+    echo "Press 1 to delete your branches and start from scratch"
+    echo "Press 2 to checkout a commit"
+    echo "Press 3 to see what commit you are on and checkout a previous commit"
+    echo "Press 4 to checkout a branch on a plugin"
+    echo "Press 5 to just update your master branch"
+    echo "Press 6 to exit"
+    read choice
+  done
 }
 
 # This function just zeroes out the logs since they are constantly being written and the space adds up
@@ -161,6 +166,12 @@ function update_migrate_compile(){
 
   bundle update
   bundle exec rake db:migrate
+
+  if [ "$?" == 0 ];
+   then
+    echo "There was a problem with migrating your database you need to manually figure out what happened"
+    exit 0
+  fi
   assets_question
 }
 # This method checks out multiple patchsets
@@ -190,7 +201,10 @@ function multiple_patchsets(){
      
      read commit
      git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD  
-     git checkout -b $commit 
+     git checkout -b $commit
+
+     duplicated_patchsets
+
    else
     
     print_dash "What is the commit number for patchset #$i?"
@@ -210,6 +224,18 @@ single_checkout
 fi
 }
 
+function duplicated_patchsets(){
+  if [ "$?" == 0 ];
+   then
+     echo "There was a duplicate patchset"
+
+     git branch -D $commit
+
+     git checkout -b $commit
+  fi
+
+}
+
 # This function just checks out one patchset 
 function single_checkout(){
   print_dash "Please give me the commit number that you want to checkout"
@@ -217,6 +243,9 @@ function single_checkout(){
 
   git fetch ssh://$NAME@gerrit.instructure.com:29418/canvas-lms refs/changes/$commit && git checkout FETCH_HEAD
   git checkout -b $commit
+
+  duplicated_patchsets
+
 }
 
 function checkout_plugin(){
@@ -237,6 +266,8 @@ function checkout_plugin(){
   git fetch
   git fetch ssh://$NAME@gerrit.instructure.com:29418/$plugin refs/changes/$commit && git checkout FETCH_HEAD
   git checkout -b $commit
+
+  duplicated_patchsets
 }
 
 # This function iterates through the different plugins and updates them
@@ -397,5 +428,7 @@ function error_check(){
 
       continue_on_question
     ;;
+
+
   esac
 
