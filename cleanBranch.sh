@@ -65,9 +65,12 @@ function change_dir() {
 
 function check_for_address_in_use(){
   #TODO If the ip address is in use find a way to kill the process and start the server back up
-  if [[ "stub" ]];
+
+  if [[ "$?" == 1 ]];
    then
-     echo "do something cool"
+     echo "Your server might already be running somewhere, let me check that out for you"
+
+     # kill $(ps aux | grep 'server' | awk '{print $2}')
   fi
 }
 
@@ -158,13 +161,15 @@ function continue_on(){
 }
 
 function duplicated_patchsets(){
-  if [[ "$?" > 0 ]];
+  if [[ "$?" == 128 ]];
    then
      echo "There was a duplicate patchset"
 
      git branch -D $commit
 
      git checkout -b $commit
+
+     git rebase origin/master
   fi
 }
 
@@ -287,6 +292,16 @@ function print_dash() {
   echo ""
 }
 
+function rebase_error(){
+  #TODO find out when you have a rebase issue and recover from it
+
+  if [[ "$?" == xx ]];
+   then
+    echo "There was a conflict in your commit, have the developer rebase their commit"
+    exit 0
+  fi
+}
+
 function redis_check(){
   #brew info redis | grep usr/local/Cellar
   redis_launchctl="~/Library/LaunchAgents/homebrew.mxcl.redis.plist"
@@ -355,9 +370,15 @@ function update_migrate_compile(){
   print_dash "Running a database migrate and compiling your assets"
 
   bundle update
+
+  if [[ "$?" != 0 ]];
+   then
+    bundle install
+  fi
+
   bundle exec rake db:migrate
 
-  if [[ "$?" > 0 ]];
+  if [[ "$?" != 0 ]];
    then
     echo "There was a problem with migrating your database you need to manually figure out what happened"
     exit 0
