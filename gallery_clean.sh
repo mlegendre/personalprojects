@@ -4,6 +4,21 @@ NAME="marc"
 ROOT_DIR=$PWD
 PROJECT="gallery"
 
+function duplicated_patchsets(){
+  if [[ "$?" == 128 ]];
+   then
+     echo "There was a duplicate patchset"
+
+     git branch -D $commit
+
+     git checkout -b $commit
+
+     git rebase origin/master
+
+     rebase_error
+  fi
+}
+
 # The menu found at the beginning of the program
 function menu(){
   echo "What do you want to do?"
@@ -13,21 +28,6 @@ function menu(){
   echo "Press 4 to just update your master branch"
   echo "Press 5 to exit"
   read choice
-}
-
-# This case statement will let the user continue on to either add more commits or checkout plugin patchsets
-function continue_on(){
-  echo "########################################"
-  echo "Press 1 to checkout a commit(s)"
-  echo "########################################"
-  read non_default_menu_answer
-
-  case $non_default_menu_answer in
-    [1]*)
-      multiple_patchsets
-      continue_on_question
-    ;;
-  esac
 }
 
 function continue_on_question(){
@@ -42,10 +42,12 @@ function continue_on_question(){
   if [ "$re_menu" == "y" ];
    then
     cd $ROOT_DIR
-    continue_on
+    multiple_patchsets
+    continue_on_question
   else
     cd $ROOT_DIR
     update_migrate_compile
+
     start_server
   fi
 }
@@ -73,8 +75,6 @@ multiple_patchsets(){
     print_dash "How many patchsets did you want to checkout?"
     read num_patchsets
 
-
-
   i=1
   while [ $i -le $num_patchsets ]; do
    if [ $i == 1 ]
@@ -85,6 +85,7 @@ multiple_patchsets(){
      read commit
      git fetch ssh://$NAME@gerrit.instructure.com:29418/gallery refs/changes/$commit && git checkout FETCH_HEAD
      git checkout -b $commit
+     duplicated_patchsets
    else
 
     print_dash "What is the commit number for patchset #$i?"
@@ -97,6 +98,8 @@ multiple_patchsets(){
   done
 
   git rebase origin/master
+
+  rebase_error
 else
 
 single_checkout
@@ -128,6 +131,14 @@ function print_dash() {
   echo ""
 }
 
+function rebase_error(){
+  if [[ "$?" == 1 ]];
+   then
+    print_dash "There was a conflict in your commit, have the developer rebase their commit"
+    exit
+  fi
+}
+
 # This fucntion deletes old commits and checkouts out master code
 function clear_commits(){
   print_dash "I am going to remove your old commits and checkout the newest code on master"
@@ -153,6 +164,12 @@ function update_migrate_compile(){
 
   bundle install
   bundle exec rake db:migrate
+
+  if [[ "$?" != 0 ]];
+   then
+    print_dash "There was a problem with migrating your database you need to manually figure out what happened"
+    exit
+  fi
 }
 
 function single_checkout(){
@@ -161,8 +178,11 @@ function single_checkout(){
 
   git fetch ssh://$NAME@gerrit.instructure.com:29418/$PROJECT refs/changes/$commit && git checkout FETCH_HEAD
   git checkout -b $commit
+  duplicated_patchsets
 
   git rebase origin/master
+
+  rebase_error
 }
 
  kill_logs
