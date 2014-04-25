@@ -26,6 +26,9 @@ function assets_question(){
 # It now takes into account the qti_migration_tool and analytics plugins
 # function change_dir() {
 function change_dir() {
+
+  # TODO Refactor this bad boy, maybe something like split out the reading of directories and updating
+  # and checking to make sure plugins are installed
   cd vendor/plugins
 
   print_dash "I am now going to update your plugins"
@@ -80,6 +83,8 @@ function checkout_master(){
   git checkout master
   git fetch
   git rebase origin/master
+
+  rebase_error
 }
 
 function checkout_plugin(){
@@ -113,6 +118,8 @@ function clear_commits(){
   git branch | grep -v 'master$' | xargs git branch -D
   git fetch
   git rebase origin/master
+
+  rebase_error
 }
 
 # This function asks the user if they would like to do anything else before starting up the server
@@ -163,13 +170,15 @@ function continue_on(){
 function duplicated_patchsets(){
   if [[ "$?" == 128 ]];
    then
-     echo "There was a duplicate patchset"
+     printf '\e[1;32m\e[m' "There was a duplicate patchset"
 
      git branch -D $commit
 
      git checkout -b $commit
 
      git rebase origin/master
+
+     rebase_error
   fi
 }
 
@@ -284,7 +293,7 @@ function print_dash() {
     printf "#"
   done
   echo ""
-  printf "$1"
+  printf '\e[1;32m%-6s\e[m' "$1"
   echo ""
      for (( x=0; x < ${#1}; x++ )); do
      printf "#"
@@ -295,9 +304,9 @@ function print_dash() {
 function rebase_error(){
   #TODO find out when you have a rebase issue and recover from it
 
-  if [[ "$?" == xx ]];
+  if [[ "$?" == 1 ]];
    then
-    echo "There was a conflict in your commit, have the developer rebase their commit"
+    printf '\e[1;31m%-6s\e[m' "There was a conflict in your commit, have the developer rebase their commit"
     exit 0
   fi
 }
@@ -381,7 +390,7 @@ function update_migrate_compile(){
   if [[ "$?" != 0 ]];
    then
     echo "There was a problem with migrating your database you need to manually figure out what happened"
-    exit 0
+    exit
   fi
   assets_question
 }
