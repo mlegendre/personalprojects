@@ -4,6 +4,9 @@ NAME="marc"
 ROOT_DIR=$PWD
 PROJECT=""
 
+#TODO Find some way to refactor updating plugins so that if you install any plugin it will be updated
+# find . -name ".git" -- This will give you all the plugins that are associated with a git repository
+
 # This function asks the user whether they want to generate new api documents
 function assets_question(){
   print_dash "Do you want to generate new API Documents y/n?"
@@ -170,7 +173,7 @@ function continue_on(){
 function duplicated_patchsets(){
   if [[ "$?" == 128 ]];
    then
-     printf '\e[1;32m\e[m' "There was a duplicate patchset"
+     print_dash_warning "There was a duplicate patchset. Removing and adding patchset back in"
 
      git branch -D $commit
 
@@ -205,6 +208,8 @@ function i18n_test(){
 
   if [ "$i18n_answer" == "y" ];
     then
+      bundle exec rake RAILS_LOAD_ALL_LOCALES=true
+      rake i18n:generate_js
       LOLCALIZE=true USE_OPTIMIZED_JS=true bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
     else
       bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
@@ -293,10 +298,36 @@ function print_dash() {
     printf "#"
   done
   echo ""
-  printf '\e[1;32m%-6s\e[m' "$1"
+  printf '\e[38;5;46m%-6s\e[m' "$1"
   echo ""
-     for (( x=0; x < ${#1}; x++ )); do
-     printf "#"
+  for (( x=0; x < ${#1}; x++ )); do
+    printf "#"
+  done
+  echo ""
+}
+
+function print_dash_error() {
+  for (( x=0; x < ${#1}; x++ )); do
+    printf "#"
+  done
+  echo ""
+  printf '\e[38;5;124m%-6s\e[m' "$1"
+  echo ""
+  for (( x=0; x < ${#1}; x++ )); do
+    printf "#"
+  done
+  echo ""
+}
+
+function print_dash_warning() {
+  for (( x=0; x < ${#1}; x++ )); do
+    printf "#"
+  done
+  echo ""
+  printf '\e[38;5;226m%-6s\e[m' "$1"
+  echo ""
+  for (( x=0; x < ${#1}; x++ )); do
+    printf "#"
   done
   echo ""
 }
@@ -306,7 +337,7 @@ function rebase_error(){
 
   if [[ "$?" == 1 ]];
    then
-    printf '\e[1;31m%-6s\e[m' "There was a conflict in your commit, have the developer rebase their commit"
+    print_dash_error "There was a conflict in your commit, have the developer rebase their commit"
     exit 0
   fi
 }
@@ -389,7 +420,7 @@ function update_migrate_compile(){
 
   if [[ "$?" != 0 ]];
    then
-    echo "There was a problem with migrating your database you need to manually figure out what happened"
+    print_dash_error "There was a problem with migrating your database you need to manually figure out what happened"
     exit
   fi
   assets_question
