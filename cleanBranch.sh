@@ -418,9 +418,9 @@ function start_rails3_server(){
     then
       bundle exec rake RAILS_LOAD_ALL_LOCALES=true
       rake i18n:generate_js
-      LOLCALIZE=true USE_OPTIMIZED_JS=true rails s SCRIPT_SERVER_NO_GUARD=1
+      LOLCALIZE=true USE_OPTIMIZED_JS=true rails s
     else
-      rails s SCRIPT_SERVER_NO_GUARD=1
+      rails s 
   fi
 }
 
