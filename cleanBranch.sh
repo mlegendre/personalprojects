@@ -215,36 +215,6 @@ function error_stop_process(){
   fi
 }
 
-# This function asks if you would like to test i18n strings
-#function i18n_test(){
-#  print_dash "Starting up your server now"
-#  print_dash "Would you like to test i18n strings?"
-#  read -t 10 i18n_answer
-#
-#  if [ -z "i18n_answer" ];
-#    then
-#     i18n_answer="n"
-#  fi
-#
-#
-#  if [[ -e "config/RAILS3" ]]
-#   then
-#     if [ "$i18n_answer" == "y" ];
-#      then
-#       bundle exec rake RAILS_LOAD_ALL_LOCALES=true
-#       rake i18n:generate_js
-#          LOLCALIZE=true USE_OPTIMIZED_JS=true rails s
-#       else
-#         LOLCALIZE=true USE_OPTIMIZED_JS=true $(start_rails2_server)
-#     fi
-#   else
-#   then
-#     start_rails3_server
-#  fi
-#
-#
-#}
-
 # This function just zeroes out the logs since they are constantly being written and the space adds up
 function kill_logs(){
   cd log
