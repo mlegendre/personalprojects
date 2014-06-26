@@ -27,7 +27,6 @@ function assets_question(){
 
 # This function iterates through the different plugins and updates them
 # It now takes into account the qti_migration_tool and analytics plugins
-# function change_dir() {
 function change_dir() {
 
   # TODO Refactor this bad boy, maybe something like split out the reading of directories and updating
@@ -77,6 +76,27 @@ function check_for_address_in_use(){
      echo "Your server might already be running somewhere, let me check that out for you"
 
      # kill $(ps aux | grep 'server' | awk '{print $2}')
+  fi
+}
+
+
+
+function check_for_RAILS3(){
+
+  if [[ -e "config/RAILS3" ]];
+   then
+    start_rails3_server
+   else
+     print_dash "It seems you are running RAILS version 2 still would you like to upgrade y/n?"
+     read rails_answer
+
+     if [[ $rails_answer == "y" ]]
+       then
+         touch config/RAILS3
+         bundle update
+         start_rails3_server
+     fi
+     start_rails2_server
   fi
 }
 
@@ -196,26 +216,34 @@ function error_stop_process(){
 }
 
 # This function asks if you would like to test i18n strings
-function i18n_test(){
-  print_dash "Starting up your server now"
-  print_dash "Would you like to test i18n strings?"
-  read -t 10 i18n_answer
-
-  if [ -z "i18n_answer" ];
-    then
-     i18n_answer="n"
-  fi
-
-  if [ "$i18n_answer" == "y" ];
-    then
-      bundle exec rake RAILS_LOAD_ALL_LOCALES=true
-      rake i18n:generate_js
-      LOLCALIZE=true USE_OPTIMIZED_JS=true bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
-    else
-      bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
-  fi
- 
-}
+#function i18n_test(){
+#  print_dash "Starting up your server now"
+#  print_dash "Would you like to test i18n strings?"
+#  read -t 10 i18n_answer
+#
+#  if [ -z "i18n_answer" ];
+#    then
+#     i18n_answer="n"
+#  fi
+#
+#
+#  if [[ -e "config/RAILS3" ]]
+#   then
+#     if [ "$i18n_answer" == "y" ];
+#      then
+#       bundle exec rake RAILS_LOAD_ALL_LOCALES=true
+#       rake i18n:generate_js
+#          LOLCALIZE=true USE_OPTIMIZED_JS=true rails s
+#       else
+#         LOLCALIZE=true USE_OPTIMIZED_JS=true $(start_rails2_server)
+#     fi
+#   else
+#   then
+#     start_rails3_server
+#  fi
+#
+#
+#}
 
 # This function just zeroes out the logs since they are constantly being written and the space adds up
 function kill_logs(){
@@ -396,13 +424,55 @@ function single_checkout(){
 }
 
 # This function starts up the script/server
-function start_delayed_job() {
+function start_delayed_job(){
   print_dash "Stopping and then Starting up your delayed jobs now"
 
   bundle exec script/delayed_job stop
   bundle exec script/delayed_job start
 
-  i18n_test
+  check_for_RAILS3
+}
+
+function start_rails3_server(){
+
+  print_dash "Starting up your RAILS3 server now"
+  print_dash "Would you like to test i18n strings?"
+  read -t 10 i18n_answer
+
+  if [ -z "i18n_answer" ];
+    then
+     i18n_answer="n"
+  fi
+
+  if [ "$i18n_answer" == "y" ];
+    then
+      bundle exec rake RAILS_LOAD_ALL_LOCALES=true
+      rake i18n:generate_js
+      LOLCALIZE=true USE_OPTIMIZED_JS=true rails s SCRIPT_SERVER_NO_GUARD=1
+    else
+      rails s SCRIPT_SERVER_NO_GUARD=1
+  fi
+}
+
+function start_rails2_server() {
+
+  print_dash "Starting up your RAILS2 server now"
+  print_dash "Would you like to test i18n strings?"
+  read -t 10 i18n_answer
+
+  if [ -z "i18n_answer" ];
+    then
+     i18n_answer="n"
+  fi
+
+  if [ "$i18n_answer" == "y" ];
+    then
+      bundle exec rake RAILS_LOAD_ALL_LOCALES=true
+      rake i18n:generate_js
+      LOLCALIZE=true USE_OPTIMIZED_JS=true bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+    else
+      bundle exec script/server SCRIPT_SERVER_NO_GUARD=1
+  fi
 }
 
 # This function updates gems, migrates the database, and compiles assets
