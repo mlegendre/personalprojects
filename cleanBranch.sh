@@ -81,22 +81,22 @@ function check_for_address_in_use(){
 
 
 
-function check_for_RAILS3(){
+function check_for_RAILS2(){
 
-  if [[ -e "config/RAILS3" ]];
+  if [[ -e "config/RAILS2" ]];
    then
-    start_rails3_server
+    start_rails2_server
    else
-     print_dash "It seems you are running RAILS version 2 still would you like to upgrade y/n?"
+     print_dash "It seems you are running RAILS version 2 would you like to upgrade y/n?"
      read rails_answer
 
      if [[ $rails_answer == "y" ]]
        then
-         touch config/RAILS3
+         rm config/RAILS2
          bundle update
-         start_rails3_server
+         start_rails2_server
      fi
-     start_rails2_server
+     start_rails3_server
   fi
 }
 
@@ -400,7 +400,7 @@ function start_delayed_job(){
   bundle exec script/delayed_job stop
   bundle exec script/delayed_job start
 
-  check_for_RAILS3
+  check_for_RAILS2
 }
 
 function start_rails3_server(){
