@@ -83,9 +83,9 @@ function check_for_address_in_use(){
 
 function check_for_RAILS2(){
 
-  if [[ -e "config/RAILS2" ]];
+  if [[ ! -e "config/RAILS2" ]];
    then
-    start_rails2_server
+    start_rails3_server
    else
      print_dash "It seems you are running RAILS version 2 would you like to upgrade y/n?"
      read rails_answer
@@ -94,9 +94,9 @@ function check_for_RAILS2(){
        then
          rm config/RAILS2
          bundle update
-         start_rails2_server
+         start_rails3_server
      fi
-     start_rails3_server
+     start_rails2_server
   fi
 }
 
