@@ -372,7 +372,7 @@ function redis_check(){
 
     printf "development:
   servers:
-    - redis: //localhost
+    - redis://localhost
   database: 1" >> config/redis.yml
 
    sed -i.bak 's/# cache_store: redis_store/cache_store: redis_store/' config/cache_store.yml
